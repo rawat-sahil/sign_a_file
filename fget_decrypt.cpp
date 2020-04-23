@@ -1,6 +1,9 @@
-#include<iostream>
-using namespace std;
+#include "helper.h"
 
-int main(){
-    cout<<"fget decrypt"<<endl;
+int main(int argc,char* argv[]){
+    if(argc==1){
+        std::cout<<"file name is required"<<std::endl;
+        return(-1);
+    }
+    fget_decrypt(std::string(argv[1]));
 }

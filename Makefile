@@ -1,35 +1,35 @@
-flags=-g
+flags=-g -lcrypto
 dependecy= helper.h
 helperfunction=helper.o
 all:fput fget fput_encrypt fget_decrypt fsign fverify
 	touch testfile
 
 %.o:%.cpp $(depends)
-	g++ $(flags) -c -o $@ $<
+	g++ $^ $(flags) -c -o $@
 
 fput:fput.o $(helperfunction)
-	g++ $(flags) -o $@ $^
+	g++ $^ $(flags) -o $@
 	sudo chmod u+s $@
 
-fget:fget.o $(helperfunction)
-	g++ $(flags) -o $@ $^
+fget:$(helperfunction) fget.o
+	g++ $^ $(flags) -o $@
 	sudo chmod u+s $@
 
 
-fput_encrypt:fput_encrypt.o $(helperfunction)
-	g++ $(flags) -o $@ $^
+fput_encrypt:$(helperfunction) fput_encrypt.o
+	g++ $^ $(flags) -o $@
 	sudo chmod u+s $@
 
-fget_decrypt:fget_decrypt.o $(helperfunction)
-	g++ $(flags) -o $@ $^
+fget_decrypt:$(helperfunction) fget_decrypt.o
+	g++ $^ $(flags) -o $@
 	sudo chmod u+s $@
 
-fsign:fsign.o $(helperfunction)
-	g++ $(flags) -o $@ $^
+fsign:$(helperfunction) fsign.o
+	g++ $^ $(flags) -o $@
 	sudo chmod u+s $@
 
-fverify:fverify.o $(helperfunction)
-	g++ $(flags) -o $@ $^
+fverify:$(helperfunction) fverify.o
+	g++ $^ $(flags) -o $@
 	sudo chmod u+s $@
 
 clean:
