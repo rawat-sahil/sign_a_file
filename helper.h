@@ -16,15 +16,13 @@
 #include <openssl/conf.h>
 #include <openssl/evp.h>
 #include <openssl/err.h>
+#include<openssl/hmac.h>
 #include<shadow.h>
 #include <pwd.h>
 
 
-
-void fput(std::string filename);
-void fget(std::string filename);
-void fput_encrypt(std::string filename);
-void fget_decrypt(std::string filename);
+void fsign(std::string filename);
+void fverify(std::string filename);
 void handleErrors();
 void get_key_iv(unsigned char * key,unsigned char *iv);
 int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,unsigned char *iv, unsigned char *plaintext);

@@ -3,6 +3,92 @@
 //
 #include "helper.h"
 
+
+
+void fsign(std::string filename){
+    /* A 256 bit key */
+    unsigned char key[33];
+
+    /* A 128 bit IV */
+    unsigned char iv[17] ;
+    unsigned char *result;
+    int result_len = 32;
+    static char res_hexstring[32];
+
+    get_key_iv(key,iv);
+
+    std::fstream myfile;
+    myfile.open(filename.c_str(),std::ios::in);
+    std::string line,wholefile,signatureFile;
+    signatureFile=std::string(filename);
+    signatureFile.append(".sign");
+    if (myfile.is_open())
+    {
+        while ( getline (myfile,line) )
+        {
+            wholefile.append(line);
+        }
+        myfile.close();
+    }
+    myfile.open(signatureFile.c_str(),std::ios::out);
+    result = HMAC(EVP_sha256(), key, strlen((char *)key), (unsigned char *)(wholefile.c_str()), strlen((char *)(wholefile.c_str())), NULL, NULL);
+    for (int i = 0; i < result_len; i++) {
+        sprintf(&(res_hexstring[i * 2]), "%02x", result[i]);
+    }
+    myfile<<res_hexstring<<"\n";
+    myfile.close();
+
+}
+void fverify(std::string filename){
+    /* A 256 bit key */
+    unsigned char key[33];
+
+    /* A 128 bit IV */
+    unsigned char iv[17] ;
+    unsigned char *result;
+    std::string expected;
+    int result_len = 32;
+    static char res_hexstring[32];
+
+    get_key_iv(key,iv);
+
+    std::fstream myfile;
+    myfile.open(filename.c_str(),std::ios::in | std::ios::binary);
+    std::string line,wholefile,signatureFile;
+    signatureFile=std::string(filename);
+    signatureFile.append(".sign");
+    if (myfile.is_open())
+    {
+        while ( getline (myfile,line) )
+        {
+            wholefile.append(line);
+        }
+        myfile.close();
+    }
+
+    result = HMAC(EVP_sha256(), key, strlen((char *)key), (unsigned char *)(wholefile.c_str()), strlen((char *)(wholefile.c_str())), NULL, NULL);
+    for (int i = 0; i < result_len; i++) {
+        sprintf(&(res_hexstring[i * 2]), "%02x", result[i]);
+    }
+
+
+    myfile.open(signatureFile.c_str(),std::ios::in | std::ios::binary);
+    getline(myfile,expected);
+
+    std::cout<<expected<<"\n";
+    std::cout<<res_hexstring<<"\n";
+
+    for(int i=0;i<32;++i){
+        if(expected[i]!=res_hexstring[i]){
+            std::cout<<"signature not verified\n";
+            exit(-1);
+        }
+    };
+    myfile.close();
+}
+
+
+
 void get_key_iv(unsigned char *key,unsigned char *iv){
     int uid=getuid();
     char * username=getpwuid(uid)->pw_name;
@@ -18,139 +104,6 @@ void get_key_iv(unsigned char *key,unsigned char *iv){
     key[32]='\0';
     strncpy((char*)iv,(char *)(out+32),17);
     iv[17]='\0';
-}
-
-
-void fput_encrypt(std::string filename) {
-    /* A 256 bit key */
-    unsigned char key[33];
-
-    /* A 128 bit IV */
-    unsigned char iv[17] ;
-    get_key_iv(key,iv);
-    std::cout<<key<<"    "<<iv<<"\n";
-
-    struct stat statbuf;
-    std::fstream myfile;
-    std::string temp;
-    unsigned char ciphertext[200];
-    int ciphertext_len;
-    if (check_file_exist(filename, &statbuf) == 1) { //check whether file exist or not
-
-        check_write_permission(filename);// exits the program if the file does not have write permission for the user
-
-        myfile.open(filename.c_str(), std::fstream::app);
-
-        std::getline(std::cin, temp);
-        while (temp.compare("//end") != 0) {
-            ciphertext_len = encrypt((unsigned char *)temp.c_str(), strlen(temp.c_str()), key, iv, ciphertext);
-            myfile << ciphertext << "\n";
-            std::getline(std::cin, temp);
-        }
-        myfile.close();
-    }
-    else { //if file does not exist create one
-        myfile.open(filename.c_str(), std::fstream::out);
-        if (!myfile) {
-            std::cout << "Error in creating file!!!" << std::endl;
-            exit(-1);
-        }
-        std::getline(std::cin, temp);
-        while (temp.compare("//end") != 0) {
-            ciphertext_len = encrypt((unsigned char *)temp.c_str(), strlen(temp.c_str()), key, iv, ciphertext);
-            ciphertext[ciphertext_len]='\0';
-            myfile << ciphertext << "\n";
-            std::getline(std::cin, temp);
-        }
-        myfile.close();
-
-
-    }
-}
-
-void fget_decrypt(std::string filename){
-    /* A 256 bit key */
-    unsigned char key[33];
-
-    /* A 128 bit IV */
-    unsigned char iv[17] ;
-    get_key_iv(key,iv);
-    std::cout<<key<<"    "<<iv<<"\n";
-
-
-    unsigned char decryptedtext[200];
-    int  decryptedtext_len;
-
-    check_read_permission(filename); // exits the program either the file does not exist or does not have read permission
-    std::ifstream myfile;
-    myfile.open(filename.c_str());
-    std::string line;
-    if (myfile.is_open())
-    {
-        while ( getline (myfile,line) )
-        {
-            decryptedtext_len=decrypt((unsigned char *)line.c_str(),strlen(line.c_str()),key,iv,decryptedtext);
-            decryptedtext[decryptedtext_len]='\0';
-            std::cout<<decryptedtext<<std::endl;
-        }
-        myfile.close();
-    }
-
-    else std::cout << "Unable to open file";
-}
-
-
-void fput(std::string filename){
-    struct stat statbuf;
-    std::fstream myfile;
-    std::string temp;
-
-    if(check_file_exist(filename,&statbuf)==1){ //check whether file exist or not
-
-        check_write_permission(filename);// exits the program if the file does not have write permission for the user
-
-        myfile.open(filename.c_str(),std::fstream::app);
-        std::getline(std::cin,temp);
-        while(temp.compare("//end")!=0){
-            myfile<<temp<<"\n";
-            std::getline(std::cin,temp);
-        }
-        myfile.close();
-    }
-
-    else{ //if file does not exist create one
-        myfile.open(filename.c_str(),std::fstream::out);
-        if(!myfile)
-        {
-            std::cout<<"Error in creating file!!!"<<std::endl;
-            exit(-1);
-        }
-        std::getline(std::cin,temp);
-        while(temp.compare("//end")!=0){
-            myfile<<temp<<"\n";
-            std::getline(std::cin,temp);
-
-        }
-        myfile.close();
-    }
-}
-
-void fget(std::string filename){
-    check_read_permission(filename); // exits the program either the file does not exist or does not have read permission
-    std::ifstream myfile;
-    myfile.open(filename.c_str());
-    std::string line;
-    if (myfile.is_open())
-    {
-        while ( getline (myfile,line) )
-        {
-            std::cout << line<<"\n";
-        }
-        myfile.close();
-    }
-
-    else std::cout << "Unable to open file";
-
 }
 
 int check_file_exist(std::string filename,struct stat *statbuf){ // return 1 if file exist
