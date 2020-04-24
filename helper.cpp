@@ -30,12 +30,14 @@ void fsign(std::string filename){
         }
         myfile.close();
     }
-    myfile.open(signatureFile.c_str(),std::ios::out);
+    myfile.open(signatureFile.c_str(),std::ios::out|std::ios::binary);
     result = HMAC(EVP_sha256(), key, strlen((char *)key), (unsigned char *)(wholefile.c_str()), strlen((char *)(wholefile.c_str())), NULL, NULL);
-    for (int i = 0; i < result_len; i++) {
-        sprintf(&(res_hexstring[i * 2]), "%02x", result[i]);
-    }
-    myfile<<res_hexstring<<"\n";
+//    for (int i = 0; i < result_len; i++) {
+//        sprintf(&(res_hexstring[i * 2]), "%02x", result[i]);
+//    }
+//    myfile<<res_hexstring<<"\n";
+    myfile<<result<<"\n";
+    std::cout<<result<<"\n";
     myfile.close();
 
 }
@@ -67,9 +69,9 @@ void fverify(std::string filename){
     }
 
     result = HMAC(EVP_sha256(), key, strlen((char *)key), (unsigned char *)(wholefile.c_str()), strlen((char *)(wholefile.c_str())), NULL, NULL);
-    for (int i = 0; i < result_len; i++) {
-        sprintf(&(res_hexstring[i * 2]), "%02x", result[i]);
-    }
+//    for (int i = 0; i < result_len; i++) {
+//        sprintf(&(res_hexstring[i * 2]), "%02x", result[i]);
+//    }
 
 
     myfile.open(signatureFile.c_str(),std::ios::in | std::ios::binary);
@@ -79,7 +81,9 @@ void fverify(std::string filename){
     std::cout<<res_hexstring<<"\n";
 
     for(int i=0;i<32;++i){
-        if(expected[i]!=res_hexstring[i]){
+//        if(expected[i]!=res_hexstring[i]){
+        if((unsigned char)expected[i]!=(unsigned char)result[i]){
+
             std::cout<<"signature not verified\n";
             exit(-1);
         }

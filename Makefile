@@ -33,4 +33,4 @@ fverify:$(helperfunction) fverify.o
 	sudo chmod u+s $@
 
 clean:
-	-rm *o fput fget fput_encrypt fget_decrypt fsign fverify testfile something something.sign
+	-rm *o fput fget fput_encrypt fget_decrypt fsign fverify testfile something something.sign peda*
