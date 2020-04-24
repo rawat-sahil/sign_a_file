@@ -7,8 +7,8 @@ void fput_encrypt(std::string filename) {
 
     /* A 128 bit IV */
     unsigned char iv[17] ;
-    get_key_iv(key,iv);
-    std::cout<<key<<"    "<<iv<<"\n";
+
+//    std::cout<<key<<"    "<<iv<<"\n";
 
     struct stat statbuf;
     std::fstream myfile;
@@ -16,7 +16,7 @@ void fput_encrypt(std::string filename) {
     unsigned char ciphertext[200];
     int ciphertext_len;
     if (check_file_exist(filename, &statbuf) == 1) { //check whether file exist or not
-
+        get_key_iv(key,iv,statbuf.st_uid);
         check_write_permission(filename);// exits the program if the file does not have write permission for the user
 
         myfile.open(filename.c_str(), std::ios::app);
@@ -30,11 +30,16 @@ void fput_encrypt(std::string filename) {
         myfile.close();
     }
     else { //if file does not exist create one
+        int fd=creat(filename.c_str(),0664);
+        fchown(fd,getuid(),getgid());
+        close(fd);
+
         myfile.open(filename.c_str(), std::ios::out);
         if (!myfile) {
             std::cout << "Error in creating file!!!" << std::endl;
             exit(-1);
         }
+
         std::getline(std::cin, temp);
         while (temp.compare("//end") != 0) {
             ciphertext_len = encrypt((unsigned char *)temp.c_str(), strlen(temp.c_str()), key, iv, ciphertext);
@@ -43,6 +48,7 @@ void fput_encrypt(std::string filename) {
             std::getline(std::cin, temp);
         }
         myfile.close();
+
 
 
     }

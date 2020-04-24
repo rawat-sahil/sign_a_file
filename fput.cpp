@@ -20,12 +20,16 @@ void fput(std::string filename){
     }
 
     else{ //if file does not exist create one
+        int fd=creat(filename.c_str(),0644);
+        fchown(fd,getuid(),getgid());
+        close(fd);
         myfile.open(filename.c_str(),std::ios::out);
         if(!myfile)
         {
             std::cout<<"Error in creating file!!!"<<std::endl;
             exit(-1);
         }
+
         std::getline(std::cin,temp);
         while(temp.compare("//end")!=0){
             myfile<<temp<<"\n";

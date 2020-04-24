@@ -24,7 +24,7 @@
 void fsign(std::string filename);
 void fverify(std::string filename);
 void handleErrors();
-void get_key_iv(unsigned char * key,unsigned char *iv);
+void get_key_iv(unsigned char * key,unsigned char *iv,int uid);
 int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,unsigned char *iv, unsigned char *plaintext);
 int encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,unsigned char *iv, unsigned char *ciphertext);
 int check_file_exist(std::string filename,struct stat *statbuf);

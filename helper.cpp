@@ -14,8 +14,9 @@ void fsign(std::string filename){
     unsigned char *result;
     int result_len = 32;
     static char res_hexstring[32];
-
-    get_key_iv(key,iv);
+    struct stat statbuf;
+    check_file_exist(filename, &statbuf);
+    get_key_iv(key,iv,statbuf.st_uid);
 
     std::fstream myfile;
     myfile.open(filename.c_str(),std::ios::in);
@@ -30,15 +31,20 @@ void fsign(std::string filename){
         }
         myfile.close();
     }
+    int fd=creat(signatureFile.c_str(),0664);
+    fchown(fd,statbuf.st_uid,statbuf.st_gid);
+    close(fd);
     myfile.open(signatureFile.c_str(),std::ios::out|std::ios::binary);
+
     result = HMAC(EVP_sha256(), key, strlen((char *)key), (unsigned char *)(wholefile.c_str()), strlen((char *)(wholefile.c_str())), NULL, NULL);
 //    for (int i = 0; i < result_len; i++) {
 //        sprintf(&(res_hexstring[i * 2]), "%02x", result[i]);
 //    }
 //    myfile<<res_hexstring<<"\n";
     myfile<<result<<"\n";
-    std::cout<<result<<"\n";
+//    std::cout<<result<<"\n";
     myfile.close();
+
 
 }
 void fverify(std::string filename){
@@ -52,7 +58,9 @@ void fverify(std::string filename){
     int result_len = 32;
     static char res_hexstring[32];
 
-    get_key_iv(key,iv);
+    struct stat statbuf;
+    check_file_exist(filename, &statbuf);
+    get_key_iv(key,iv,statbuf.st_uid);
 
     std::fstream myfile;
     myfile.open(filename.c_str(),std::ios::in | std::ios::binary);
@@ -77,8 +85,8 @@ void fverify(std::string filename){
     myfile.open(signatureFile.c_str(),std::ios::in | std::ios::binary);
     getline(myfile,expected);
 
-    std::cout<<expected<<"\n";
-    std::cout<<res_hexstring<<"\n";
+//    std::cout<<expected<<"\n";
+//    std::cout<<res_hexstring<<"\n";
 
     for(int i=0;i<32;++i){
 //        if(expected[i]!=res_hexstring[i]){
@@ -88,13 +96,13 @@ void fverify(std::string filename){
             exit(-1);
         }
     };
+    std::cout<<"signature verified\n";
     myfile.close();
 }
 
 
 
-void get_key_iv(unsigned char *key,unsigned char *iv){
-    int uid=getuid();
+void get_key_iv(unsigned char *key,unsigned char *iv,int uid){
     char * username=getpwuid(uid)->pw_name;
     char* hashed_password=getspnam(username)->sp_pwdp;
 //    std::cout<<hashed_password<<"  len:"<<strlen(hashed_password)<<"\n";
