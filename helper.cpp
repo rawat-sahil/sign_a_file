@@ -60,6 +60,7 @@ void fverify(std::string filename){
 
     struct stat statbuf;
     check_file_exist(filename, &statbuf);
+    check_read_permission(filename);
     get_key_iv(key,iv,statbuf.st_uid);
 
     std::fstream myfile;
@@ -116,6 +117,9 @@ void get_key_iv(unsigned char *key,unsigned char *iv,int uid){
     key[32]='\0';
     strncpy((char*)iv,(char *)(out+32),17);
     iv[17]='\0';
+
+    std::cout<<key<<"\n";
+    std::cout<<iv<<"\n";
 }
 
 int check_file_exist(std::string filename,struct stat *statbuf){ // return 1 if file exist

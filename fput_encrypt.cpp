@@ -24,15 +24,19 @@ void fput_encrypt(std::string filename) {
         std::getline(std::cin, temp);
         while (temp.compare("//end") != 0) {
             ciphertext_len = encrypt((unsigned char *)temp.c_str(), strlen(temp.c_str()), key, iv, ciphertext);
+            ciphertext[ciphertext_len]='\0';
             myfile << ciphertext << "\n";
             std::getline(std::cin, temp);
         }
         myfile.close();
     }
     else { //if file does not exist create one
+        get_key_iv(key,iv,getuid());
+
         int fd=creat(filename.c_str(),0664);
         fchown(fd,getuid(),getgid());
         close(fd);
+
 
         myfile.open(filename.c_str(), std::ios::out);
         if (!myfile) {
@@ -43,7 +47,9 @@ void fput_encrypt(std::string filename) {
         std::getline(std::cin, temp);
         while (temp.compare("//end") != 0) {
             ciphertext_len = encrypt((unsigned char *)temp.c_str(), strlen(temp.c_str()), key, iv, ciphertext);
+//            std::cout<<ciphertext<<"   before\n";
             ciphertext[ciphertext_len]='\0';
+//            std::cout<<ciphertext<<"   after\n";
             myfile << ciphertext << "\n";
             std::getline(std::cin, temp);
         }

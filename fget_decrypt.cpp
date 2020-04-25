@@ -25,6 +25,7 @@ void fget_decrypt(std::string filename){
     {
         while ( getline (myfile,line) )
         {
+//            std::cout<<(unsigned char *)line.c_str()<<"\n";
             decryptedtext_len=decrypt((unsigned char *)line.c_str(),strlen(line.c_str()),key,iv,decryptedtext);
             decryptedtext[decryptedtext_len]='\0';
             std::cout<<decryptedtext<<std::endl;
