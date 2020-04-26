@@ -2,14 +2,11 @@
 
 
 void fput_encrypt(std::string filename) {
-    /* A 256 bit key */
     unsigned char key[33];
-
-    /* A 128 bit IV */
     unsigned char iv[17] ;
 
-//    std::cout<<key<<"    "<<iv<<"\n";
 
+//check if file exist and if exist who is the owner
     struct stat statbuf;
     std::fstream myfile;
     std::string temp;
@@ -30,7 +27,9 @@ void fput_encrypt(std::string filename) {
         }
         myfile.close();
     }
-    else { //if file does not exist create one
+
+
+    else { //if file does not exist create one with the uid of current uid and gid
         get_key_iv(key,iv,getuid());
 
         int fd=creat(filename.c_str(),0664);

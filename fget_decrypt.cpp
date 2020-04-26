@@ -4,11 +4,11 @@
 void fget_decrypt(std::string filename){
 
     check_read_permission(filename); // exits the program either the file does not exist or does not have read permission
-    /* A 256 bit key */
     unsigned char key[33];
-    /* A 128 bit IV */
     unsigned char iv[17] ;
     struct stat statbuf;
+
+    //check if file exist
     check_file_exist(filename, &statbuf);
     get_key_iv(key,iv,statbuf.st_uid);
 //    std::cout<<key<<"    "<<iv<<"\n";

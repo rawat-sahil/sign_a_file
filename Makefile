@@ -2,7 +2,6 @@ flags=-g -lcrypto
 dependecy= helper.h
 helperfunction=helper.o
 all:fput fget fput_encrypt fget_decrypt fsign fverify
-	touch testfile
 
 %.o:%.cpp $(depends)
 	g++ $^ $(flags) -c -o $@
